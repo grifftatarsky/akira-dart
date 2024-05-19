@@ -16,10 +16,12 @@ public class CaptchaServiceV3 extends AbstractCaptchaService {
 
   public static final String REGISTER_ACTION = "register";
 
-  public CaptchaServiceV3(HttpServletRequest request,
+  public CaptchaServiceV3(
+      HttpServletRequest request,
       CaptchaSettings captchaSettings,
       ReCaptchaAttemptService reCaptchaAttemptService,
-      RestOperations restTemplate) {
+      RestOperations restTemplate
+  ) {
     super(request, captchaSettings, reCaptchaAttemptService, restTemplate);
   }
 

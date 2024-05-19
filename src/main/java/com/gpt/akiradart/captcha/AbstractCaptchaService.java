@@ -6,15 +6,13 @@ import java.util.regex.Pattern;
 import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestOperations;
 
+@Slf4j
 @RequiredArgsConstructor
 public abstract class AbstractCaptchaService implements ICaptchaService{
-
-  private final static Logger LOGGER = LoggerFactory.getLogger(AbstractCaptchaService.class);
 
   protected final HttpServletRequest request;
 
@@ -26,7 +24,8 @@ public abstract class AbstractCaptchaService implements ICaptchaService{
 
   protected static final Pattern RESPONSE_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
-  protected static final String RECAPTCHA_URL_TEMPLATE = "https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s&remoteip=%s";
+  protected static final String RECAPTCHA_URL_TEMPLATE
+      = "https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s&remoteip=%s";
 
   @Override
   public String getReCaptchaSite() {
@@ -40,7 +39,7 @@ public abstract class AbstractCaptchaService implements ICaptchaService{
 
 
   protected void securityCheck(final String response) {
-    LOGGER.debug("Attempting to validate response {}", response);
+    log.debug("Attempting to validate response {}", response);
 
     if (reCaptchaAttemptService.isBlocked(getClientIP())) {
       throw new ReCaptchaInvalidException("Client exceeded maximum number of failed attempts");

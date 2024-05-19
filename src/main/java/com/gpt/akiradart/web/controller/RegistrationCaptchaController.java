@@ -21,17 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class RegistrationCaptchaController {
 
   private final IUserService userService;
-
   private final ICaptchaService captchaService;
-
   private final ICaptchaService captchaServiceV3;
-
   private final ApplicationEventPublisher eventPublisher;
 
-  // Registration
+  // Registration with captcha (v2?)
   @PostMapping("/user/registrationCaptcha")
-  public GenericResponse captchaRegisterUserAccount(@Valid final RegistrationUserDTO accountDto,
-      final HttpServletRequest request) {
+  public GenericResponse captchaRegisterUserAccount(
+      @Valid final RegistrationUserDTO accountDto,
+      final HttpServletRequest request
+  ) {
 
     final String response = request.getParameter("g-recaptcha-response");
     captchaService.processResponse(response);
@@ -39,10 +38,12 @@ public class RegistrationCaptchaController {
     return registerNewUserHandler(accountDto, request);
   }
 
-  // Registration reCaptchaV3
+  // Registration with reCaptchaV3
   @PostMapping("/user/registrationCaptchaV3")
-  public GenericResponse captchaV3RegisterUserAccount(@Valid final RegistrationUserDTO accountDto,
-      final HttpServletRequest request) {
+  public GenericResponse captchaV3RegisterUserAccount(
+      @Valid final RegistrationUserDTO accountDto,
+      final HttpServletRequest request
+  ) {
 
     final String response = request.getParameter("response");
     captchaServiceV3.processResponse(response, CaptchaServiceV3.REGISTER_ACTION);
@@ -50,13 +51,15 @@ public class RegistrationCaptchaController {
     return registerNewUserHandler(accountDto, request);
   }
 
-  private GenericResponse registerNewUserHandler(final RegistrationUserDTO accountDto,
-      final HttpServletRequest request) {
+  private GenericResponse registerNewUserHandler(final RegistrationUserDTO accountDto, final HttpServletRequest request) {
     log.debug("Registering user account with information: {}", accountDto);
 
     final User registered = userService.registerNewUserAccount(accountDto);
-    eventPublisher.publishEvent(
-        new OnRegistrationCompleteEvent(registered, request.getLocale()));
+    eventPublisher.publishEvent(new OnRegistrationCompleteEvent(registered, request.getLocale(), getAppUrl(request)));
     return new GenericResponse("success");
+  }
+
+  private String getAppUrl(HttpServletRequest request) {
+    return "https://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
   }
 }

@@ -15,10 +15,12 @@ import org.springframework.web.client.RestOperations;
 @Service("captchaService")
 public class CaptchaService extends AbstractCaptchaService {
 
-  public CaptchaService(HttpServletRequest request,
+  public CaptchaService(
+      HttpServletRequest request,
       CaptchaSettings captchaSettings,
       ReCaptchaAttemptService reCaptchaAttemptService,
-      RestOperations restTemplate) {
+      RestOperations restTemplate
+  ) {
     super(request, captchaSettings, reCaptchaAttemptService, restTemplate);
   }
 

@@ -28,10 +28,9 @@ public class DifferentLocationChecker implements UserDetailsChecker {
     final String ip = getClientIP();
     final NewLocationToken token = userService.isNewLoginLocation(userDetails.getUsername(), ip);
     if (token != null) {
-      eventPublisher.publishEvent(
-          new OnDifferentLocationLoginEvent(request.getLocale(), userDetails.getUsername(), ip,
-              token));
-      throw new UnusualLocationException("Login conducted from an unusual location");
+      final String appUrl = "https://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+      eventPublisher.publishEvent(new OnDifferentLocationLoginEvent(request.getLocale(), userDetails.getUsername(), ip, token, appUrl));
+      throw new UnusualLocationException("unusual location");
     }
   }
 

@@ -40,8 +40,6 @@ import org.springframework.security.web.authentication.rememberme.InMemoryTokenR
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-// TODO: Why is this commented out?
-// @ImportResource({ "classpath:webSecurityConfig.xml" })
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
