@@ -22,13 +22,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
@@ -40,22 +38,19 @@ import org.springframework.security.web.authentication.rememberme.InMemoryTokenR
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecSecurityConfig {
-
-  private final UserDetailsService userDetailsService;
-
-  private final AuthenticationSuccessHandler myAuthenticationSuccessHandler;
-
-  private final LogoutSuccessHandler myLogoutSuccessHandler;
-
-  private final AuthenticationFailureHandler authenticationFailureHandler;
-
-  private final CustomWebAuthenticationDetailsSource authenticationDetailsSource;
+public class SecurityConfig {
 
   private final UserRepository userRepository;
+  private final UserDetailsService userDetailsService;
+  private final LogoutSuccessHandler myLogoutSuccessHandler;
+  private final AuthenticationFailureHandler authenticationFailureHandler;
+  private final AuthenticationSuccessHandler myAuthenticationSuccessHandler;
+  private final CustomWebAuthenticationDetailsSource authenticationDetailsSource;
 
   @Bean
   public AuthenticationManager authManager(HttpSecurity http) throws Exception {
@@ -74,7 +69,15 @@ public class SecSecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").permitAll()
+            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**",
+                "/login*", "/logout*", "/signin/**", "/signup/**",
+                "/customLogin", "/user/registration*", "/registrationConfirm*",
+                "/expiredAccount*", "/registration*", "/badUser*",
+                "/user/resendRegistrationToken*", "/forgetPassword*",
+                "/user/resetPassword*", "/user/savePassword*",
+                "/updatePassword*", "/user/changePassword*",
+                "/emailError*", "/resources/**", "/old/user/registration*",
+                "/successRegister*", "/qrcode*", "/user/enableNewLoc*").permitAll()
             .anyRequest().authenticated()
         )
         .formLogin(formLogin -> formLogin
@@ -88,21 +91,16 @@ public class SecSecurityConfig {
             .permitAll()
         )
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/h2-console/**")
+            .ignoringRequestMatchers("/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**")
         )
         .headers(headers -> headers
             .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
         )
-        .httpBasic(httpBasic -> {});
-
-    http.exceptionHandling(exceptionHandling -> exceptionHandling
-        .defaultAuthenticationEntryPointFor((request, response, authException) -> response.sendRedirect("/login"),
-            (request) -> request.getRequestURI().equals("/")));
-
+        .httpBasic(withDefaults());
     return http.build();
   }
 
-  // beans
+
   @Bean
   public SecurityExpressionHandler<FilterInvocation> customWebSecurityExpressionHandler() {
     DefaultWebSecurityExpressionHandler expressionHandler =
